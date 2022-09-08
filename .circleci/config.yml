@@ -136,7 +136,14 @@ jobs:
                 npm audit fix --force --audit-level=critical
                 npm audit --audit-level=critical
         - notify_on_failure
-
+    notify_on_success:
+      docker:
+          - image: cimg/base:stable
+      steps:
+          - slack/notify:
+              event: pass
+              channel: cicd-pipeline
+              template: success_tagged_deploy_1
 #   deploy-infrastructure:
 #     docker:
 #       # Docker image here that supports AWS CLI
@@ -302,14 +309,7 @@ jobs:
 #               # your code here
 #             fi
             
- notify_on_success:
-   docker:
-      - image: cimg/base:stable
-   steps:
-      - slack/notify:
-          event: pass
-          channel: cicd-pipeline
-          template: success_tagged_deploy_1
+ 
 workflows:
   default:
     jobs:
