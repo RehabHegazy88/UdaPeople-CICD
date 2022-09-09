@@ -202,24 +202,30 @@ jobs:
             template: success_tagged_deploy_1
       # Here's where you will add some code to rollback on failure      
 
-#   configure-infrastructure:
-#     docker:
-#       # Docker image here that supports Ansible
-#     steps:
-#       # Checkout code from git
-#       # Add ssh keys with fingerprint
-#       # attach workspace
-#       - run:
-#           name: Install dependencies
-#           command: |
-#             # Your code here
-#             exit 1
-#       - run:
-#           name: Configure server
-#           command: |
-#             # Your code here
-#             exit 1
-#       # Here's where you will add some code to rollback on failure      
+  configure-infrastructure:
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - checkout
+      - install-ansible
+      - add_ssh_keys:
+              # You can get this ID in the section where you registered the SSH Key 
+              fingerprints: ["2f:83:ab:7f:0a:1a:01:20:06:cd:a9:b5:b1:cf:05:ca"]
+      - attach_workspace:
+          at: ~/  
+      - run:
+          name: Install dependencies
+          command: |
+            # Your code here
+            exit 1
+      - run:
+          name: Configure server
+          command: |
+            cd .circleci/ansible
+            cat inventory.txt
+            ansible-playbook -i inventory.txt configure-server.yml
+      - destroy-environment
+      # Here's where you will add some code to rollback on failure      
 
 #   run-migrations:
 #     docker:
@@ -353,11 +359,11 @@ workflows:
           filters:
             branches:
               only: [master]
+      - configure-infrastructure:
+          requires: [deploy-infrastructure]
       - notify_on_success:
           requires:
-              - deploy-infrastructure
-      # - configure-infrastructure:
-      #     requires: [deploy-infrastructure]
+              - configure-infrastructure
       # - run-migrations:
       #     requires: [configure-infrastructure]
       # - deploy-frontend:
