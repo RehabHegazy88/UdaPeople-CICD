@@ -212,12 +212,7 @@ jobs:
               # You can get this ID in the section where you registered the SSH Key 
               fingerprints: ["2f:83:ab:7f:0a:1a:01:20:06:cd:a9:b5:b1:cf:05:ca"]
       - attach_workspace:
-          at: ~/  
-      - run:
-          name: Install dependencies
-          command: |
-            # Your code here
-            exit 1
+          at: ~/   
       - run:
           name: Configure server
           command: |
