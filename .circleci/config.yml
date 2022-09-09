@@ -243,8 +243,7 @@ jobs:
           command: |
              cd backend
              npm install
-             npm run migrations > migrations_dump.txt
-             cat npm run migrations
+             npm run migrations > migrations_dump.txt 
       - run:
           name: Print migrations
           command: |
