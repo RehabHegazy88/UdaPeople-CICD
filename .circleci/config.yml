@@ -31,8 +31,7 @@ commands:
       Workflow_ID:
         type: string
         default: ${CIRCLE_WORKFLOW_ID:0:7}
-    steps:
-      - install-awscli
+    steps: 
       - run:
           name: Destroy environments
           when: on_fail
@@ -210,6 +209,7 @@ jobs:
       - image: cimg/base:stable
     steps:
       - checkout
+      - install-awscli
       - install-ansible
       - add_ssh_keys:
               # You can get this ID in the section where you registered the SSH Key 
