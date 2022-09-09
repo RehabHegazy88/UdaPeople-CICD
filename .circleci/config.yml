@@ -249,7 +249,9 @@ jobs:
           name: Print migrations
           command: |
             cd backend
+            cat **********************
             cat migrations_dump.txt
+            cat **********************
       - run:
           name: Send migration results to KVDB_BUCKET
           command: | 
