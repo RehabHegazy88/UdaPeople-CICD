@@ -298,22 +298,49 @@ jobs:
       - revert-migrations
       # Here's where you will add some code to rollback on failure      
                     
-#   deploy-backend:
-#     docker:
-#       # Docker image here that supports Ansible
-#     steps:
-#       # Checkout code from git
-#       # Add ssh keys with fingerprint
-#       # attach workspace
-#       - run:
-#           name: Install dependencies
-#           command: |
-#             # your code here
-#       - run:
-#           name: Deploy backend
-#           command: |
-#             # your code here
-#       # Here's where you will add some code to rollback on failure  
+  deploy-backend:
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - checkout
+      - install-awscli
+      - install-ansible
+      - install-nodejs
+      - add_ssh_keys:
+              # You can get this ID in the section where you registered the SSH Key 
+              fingerprints: ["2f:83:ab:7f:0a:1a:01:20:06:cd:a9:b5:b1:cf:05:ca"]
+      # attach workspace
+      - attach_workspace:
+          at: ~/   
+      - restore_cache:
+          keys: [backend-deps]
+      - run:
+          name: Install dependencies
+          command: |
+            cd backend
+            npm install
+      - run:
+          name: package backend
+          command: |
+             cd backend
+             npm run build
+             tar -czf artifact.tar.gz dist/*  package*
+             cd ..
+             cd backend/artifact.tar.gz   .circleci/ansible/roles/deploy/files       
+      - run:
+          name: Deploy backend
+          command: |
+              export TYPEORM_MIGRATIONS_DIR=./migrations
+              export TYPEORM_ENTITIES=./modules/domain/**/*.entity{.ts,.js}
+              export TYPEORM_MIGRATIONS=./migrations/*.ts
+              cd .circleci/ansible
+              cat inventory.txt
+              ansible-playbook -i inventory.txt deploy-backend.yml
+      
+      - destroy-environment
+      - revert-migrations
+
+      # Here's where you will add some code to rollback on failure  
 
 #   smoke-test:
 #     docker:
@@ -399,11 +426,12 @@ workflows:
      
       - deploy-frontend:
           requires: [run-migrations]
+      - deploy-backend:
+          requires: [run-migrations]
+          
       - notify_on_success:
           requires:
-              - deploy-frontend
-      # - deploy-backend:
-      #     requires: [run-migrations]
+              - deploy-backend
       # - smoke-test:
       #     requires: [deploy-backend, deploy-frontend]
       # - cloudfront-update:
