@@ -222,21 +222,27 @@ jobs:
       - destroy-environment
       # Here's where you will add some code to rollback on failure      
 
-#   run-migrations:
-#     docker:
-#       # Docker image here that supports NodeJS
-#     steps:
-#       # Checkout code from git
-#       - run:
-#           name: Run migrations
-#           command: |
-#             # Your code here
-#             exit 1
-#       - run:
-#           name: Send migration results to memstash
-#           command: |
-#             # Your code here
-#             exit 1
+  run-migrations:
+    docker:
+      - image: cimg/node:13.8.0
+    steps:
+      - checkout
+      - install-ansible
+      - run:
+          name: Run migrations
+          command: |
+             cd backend
+             npm install
+             npm run migrations > migrations_dump.txt
+      - run:
+          name: Send migration results to memstash
+          command: |
+           if grep -q "has been executed successfully." ~/project/backend/migrations_dump.txt
+            then
+              curl https://kvdb.io/${KDVB_BUCKET}/migration_${CIRCLE_WORKFLOW_ID:0:7} -d 1
+            fi
+      - destroy-environment
+      - revert-migrations
 #      # Here's where you will add some code to rollback on failure      
 
 #   deploy-frontend:
@@ -356,11 +362,11 @@ workflows:
               only: [master]
       - configure-infrastructure:
           requires: [deploy-infrastructure]
+      - run-migrations:
+          requires: [configure-infrastructure]
       - notify_on_success:
           requires:
-              - configure-infrastructure
-      # - run-migrations:
-      #     requires: [configure-infrastructure]
+              - run-migrations
       # - deploy-frontend:
       #     requires: [run-migrations]
       # - deploy-backend:
