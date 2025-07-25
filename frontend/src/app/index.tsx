@@ -2,6 +2,7 @@ import React from 'react';
 import { Route, Switch, Redirect, RouteComponentProps } from 'react-router';
 import App from './containers/App';
 import { hot } from 'react-hot-loader';
+import { InvestInEgyptPage } from './components/InvestInEgypt';
 import './style.local.css';
 
 export interface Props {}
@@ -21,7 +22,9 @@ export class Root extends React.Component<Props, State> {
     return (
       <div>
         <Switch>
-          <Route exact path="/" render={() => <Redirect to="/employees" />} />
+          <Route exact path="/" render={() => <InvestInEgyptPage />} />
+          <Route exact path="/invest-in-egypt" render={() => <InvestInEgyptPage />} />
+          <Route exact path="/employees" render={() => <Redirect to="/employees" />} />
           <Route
             render={(props: RouteComponentProps<void>) => {
               return <App {...props} />;
